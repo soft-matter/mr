@@ -4,7 +4,7 @@ python:
 # command to install dependencies
 before_install:
   - sudo apt-get -qq update
-  - SITE_PKG_DIR=$VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/site-packages
+  - export SITE_PKG_DIR=$VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/site-packages
   - echo "Using SITE_PKG_DIR: $SITE_PKG_DIR"
   - rm -f $VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/no-global-site-packages.txt
   - sudo apt-get install gfortran g++
