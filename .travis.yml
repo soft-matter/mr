@@ -11,7 +11,6 @@ before_install:
   - ci/before_install.sh
 
 install:
-  - pip install matplotlib
   - pip install nose cython numexpr
   - pip install -e git+https://github.com/pydata/pandas#egg=pandas
   - pip install lmfit
