@@ -1,12 +1,39 @@
 import trackpy.tracking as pt
 import numpy as np
 import pandas as pd
+import itertools
 
 class Feature(pt.PointND):
     "Extends pt.PointND to carry meta information from feature identification."
     def tag_id(self, id):
         self.id = id # unique ID derived from sequential index
                      # of features DataFrame
+
+def group_grid(df, cell_size):
+    grid_designations = df.div(cell_size).apply(np.floor)
+    grid = df.groupby(grid_designations)
+    return grid
+
+def pd_link(features, search_range):
+    position_cols = ['x', 'y']
+    t = features.reset_index(drop=True)[position_cols + ['frame']] 
+
+    first_frame = t['frame'].min()
+    N = len(t.loc[first_frame])
+    t.loc[first_frame] = np.arange(N)
+    probe_counter = itertools.count(N)
+
+    previous = None
+    for frame_no, f in t.groupby('frame'):
+        if frame_no == first_frame:
+            previous = group_grid(f[position_cols], search_range)
+            continue
+        print f
+        grid = group_grid(f[position_cols], search_range)
+        return grid
+        for region, cands in grid:
+            print region
+        previous = f
 
 def track(features, search_range=5, memory=0, box_size=100):
     """Link features into trajectories.
