@@ -172,8 +172,10 @@ def tp_msd(traj, mpp, fps, a, lagframes=np.logspace(0, 2, num=10).round()):
     -----
     Input units are pixels and frames. Output units are microns and seconds.
     """
-    D = tpcorr(traj, mpp, fps, lagframes, bins=False)
-    return 2/a*(D['R']*D['para']).groupby(level=0).mean()
+    D = tp_corr(traj, mpp, 1, lagframes, bins=False)
+    result =  2/a*(D['R']*D['para']).groupby(level=0).mean()
+    result.index = result.index.to_series().astype('float64')/fps
+    return result
     
     
 def tp_corr(traj, mpp, fps, lagframes=np.logspace(0, 2, num=10).round(), bins=10):
@@ -223,9 +225,12 @@ def _tp_corr(traj, lagframe=1, bins=False):
     D = []
     for p1 in probe_ids:
         for p2 in probe_ids[probe_ids > p1]:
-            R = np.sqrt((dr[(p1, 'x')] - dr[(p2, 'x')])**2 + (dr[(p1, 'y')] - dr[(p2, 'y')])**2)
-            para = dr[(p1, 'dx')]*dr[(p2, 'dx')] + dr[(p1, 'dy')]*dr[(p2, 'dy')]
-            perp = dr[(p1, 'dx')]*dr[(p2, 'dy')] - dr[(p1, 'dy')]*dr[(p2, 'dx')]
+            R_x, R_y = dr[(p1, 'x')] - dr[(p2, 'x')], dr[(p1, 'y')] - dr[(p2, 'y')]
+            R = np.sqrt(R_x**2 + R_y**2)
+            n_x, n_y = R_x/R, R_y/R
+            para = (dr[(p1, 'dx')]*n_x + dr[(p1, 'dy')]*n_y)*(dr[(p2, 'dx')]*n_x + dr[(p2, 'dy')]*n_y)
+            p_x, p_y = n_y, -n_x
+            perp = (dr[(p1, 'dx')]*p_x + dr[(p1, 'dy')]*p_y)*(dr[(p2, 'dx')]*p_x + dr[(p2, 'dy')]*p_y)
             D.append(DataFrame({'R': R, 'para': para, 'perp': perp}).dropna())
     D = pd.concat(D)
     if not bins:
