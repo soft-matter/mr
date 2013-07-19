@@ -205,7 +205,11 @@ def fit(data, fits, inverted_model=False, logx=False, logy=False, ax=None,
         **kwargs):
     data = data.dropna()
     x, y = data.index.values.astype('float64'), data.values
-    datalines = plt.plot(x, y, 'o', label=data.name)
+    try:
+        name = data.name
+    except AttributeError:
+        name = None
+    datalines = plt.plot(x, y, 'o', label=name)
     ax = datalines[0].get_axes()
     if logx:
         ax.set_xscale('log')
