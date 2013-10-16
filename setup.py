@@ -1,6 +1,6 @@
 import os
 import setuptools
-from numpy.distutils.core import setup, Extension
+from numpy.distutils.core import setup
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -74,7 +74,6 @@ setup(
     url = "https://github.com/danielballan/mr",
     packages = ['mr', 'mr.core', 'mr.video', 'mr.wire', 'mr.uncertainty'],
     long_description = read('README.md'),
-    ext_modules = [Extension('_Cfilters', ['mr/src/Cfilters.c'])],
     package_dir = {'mr': 'mr'},
-    package_data = {'mr': ['doc/*', 'db_schema.sql']},
+    package_data = {'mr': ['doc/*']}
 )
