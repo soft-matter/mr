@@ -35,10 +35,18 @@ from mr.core import uncertainty
 from mr.core import plots
 from mr.core.preprocessing import (bandpass, circular_mask, rgmask, thetamask,
                                    sinmask, cosmask, scale_to_gamut)
-import _Cfilters
 import warnings
 
 logger = logging.getLogger(__name__)
+
+def _nullify_secondary_maxima(a):
+    target = a.size // 2 + 1
+    target_val = a[target]
+    if np.any(a[:target] > target_val):
+        return 0
+    if np.any(a[target + 1:] >= target_val):
+        return 0
+    return target
 
 def local_maxima(image, diameter, separation, percentile=64):
     """Find local maxima whose brightness is above a given percentile."""
@@ -66,7 +74,7 @@ def local_maxima(image, diameter, separation, percentile=64):
     maxima_map = np.zeros_like(image)
     maxima_map[maxima] = image[maxima]
     peak_map = filters.generic_filter(
-        maxima_map, _Cfilters.nullify_secondary_maxima(), 
+        maxima_map, _nullify_secondary_maxima, 
         footprint=circular_mask(separation), mode='constant')
     # Also, do not accept peaks near the edges.
     margin = int(separation)//2
